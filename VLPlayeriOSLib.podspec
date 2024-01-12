@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "VLPlayeriOSLib"
-  s.version      = "2.6.2"
+  s.version      = "2.6.3"
   s.summary      = "VLPlayer SDK for iOS.  SDKs page: https://developer.viewlift.com/docs/sdk-ios-player/"
 
   s.description  = <<-DESC
@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
   s.license      = { :type => "MIT", :file => "LICENSE" }
   s.authors             = { "VL Player" => "techsupport@viewlift.com" }
   s.platform     = :ios
-  s.ios.deployment_target = "12.0"
+  s.ios.deployment_target = "14.0"
   s.source       = { :git => "https://github.com/snagfilms/ViewLift-IOS-PlayerFramework.git", :tag => s.version.to_s }
 
   s.default_subspecs = 'Main'
