@@ -37,6 +37,6 @@ let package = Package(
                 path: "VLPlayerLibWrapper/Sources"),
         .binaryTarget(name: "GoogleInteractiveMediaAds", path: "DependentFrameworks/GoogleInteractiveMediaAds.xcframework"),
         .binaryTarget(name: "AmazonIVSPlayer", path: "DependentFrameworks/AmazonIVSPlayer.xcframework"),
-//		.binaryTarget(name: "VLBeaconLib", path: "DependentFrameworks/VLBeaconLib.xcframework")
+		.binaryTarget(name: "GoogleCast", path: "DependentFrameworks/GoogleCast.xcframework")
     ]
 )
