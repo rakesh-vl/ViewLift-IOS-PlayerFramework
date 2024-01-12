@@ -507,6 +507,11 @@ SWIFT_CLASS("_TtC11VLPlayerLib8VLPlayer")
 @end
 
 
+@interface VLPlayer (SWIFT_EXTENSION(VLPlayerLib))
+- (BOOL)isPlaying SWIFT_WARN_UNUSED_RESULT;
+@end
+
+
 
 
 
@@ -687,13 +692,11 @@ SWIFT_CLASS("_TtC11VLPlayerLib8VLPlayer")
 @end
 
 
-/// remark:
-///
-/// Confirm to this protocol and add callback methods to your view controller to get video playback and states
-/// Also included Ads callback methods and chromecast methods.
 SWIFT_PROTOCOL("_TtP11VLPlayerLib21videoPlaybackDelegate_")
 @protocol videoPlaybackDelegate <NSObject>
 @optional
+- (void)customPlayerStateWithIsPlaying:(BOOL)isPlaying;
+- (void)customPlayerControlsWithIsHidden:(BOOL)isHidden;
 /// important:
 ///
 /// Delgate method - called when video player started playback

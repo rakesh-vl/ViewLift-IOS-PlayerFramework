@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.8.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -20,12 +20,16 @@ let package = Package(
         .package(
             name: "M3U8Parser",
             url: "https://github.com/M3U8Kit/M3U8Parser.git",
-            from: "1.0.2")
+            from: "1.0.2"),
+        .package(
+            url: "https://github.com/farazvl/VLBeaconSwift.git",
+            branch: "beacon_fix")
     ],
     targets: [
         .binaryTarget(name: "VLPlayerLib", path: "VLPlayerLib.xcframework"),
         .target(name: "VLPlayerLibWrapper",
                 dependencies: [
+                    .product(name: "VLBeaconLib", package: "VLBeaconSwift"),
                     .product(name: "VisualEffectView", package: "VisualEffectView"),
                     .product(name: "M3U8Parser", package: "M3U8Parser"),
                     .target(name: "VLPlayerLib")
@@ -33,6 +37,6 @@ let package = Package(
                 path: "VLPlayerLibWrapper/Sources"),
         .binaryTarget(name: "GoogleInteractiveMediaAds", path: "DependentFrameworks/GoogleInteractiveMediaAds.xcframework"),
         .binaryTarget(name: "AmazonIVSPlayer", path: "DependentFrameworks/AmazonIVSPlayer.xcframework"),
-		.binaryTarget(name: "VLBeaconLib", path: "DependentFrameworks/VLBeaconLib.xcframework")
+//		.binaryTarget(name: "VLBeaconLib", path: "DependentFrameworks/VLBeaconLib.xcframework")
     ]
 )

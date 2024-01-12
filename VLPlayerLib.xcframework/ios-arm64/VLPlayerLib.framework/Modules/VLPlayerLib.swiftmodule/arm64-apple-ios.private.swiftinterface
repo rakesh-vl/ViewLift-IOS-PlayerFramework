@@ -1,6 +1,6 @@
 // swift-interface-format-version: 1.0
 // swift-compiler-version: Apple Swift version 5.9.2 (swiftlang-5.9.2.2.56 clang-1500.1.0.2.5)
-// swift-module-flags: -target arm64-apple-ios12.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name VLPlayerLib
+// swift-module-flags: -target arm64-apple-ios14.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name VLPlayerLib
 // swift-module-flags-ignorable: -enable-bare-slash-regex
 import AVFoundation
 import AVKit
@@ -20,6 +20,7 @@ import Swift
 import SwiftUI
 import SystemConfiguration
 import UIKit
+import VLBeaconLib
 import _Concurrency
 import _StringProcessing
 import _SwiftConcurrencyShims
@@ -62,6 +63,26 @@ extension AmazonIVSPlayer.IVSPlayer {
   open var vl_errorCode: Swift.String?
   @objc override dynamic public init()
   @objc deinit
+}
+public enum NetworkConnectionStatus : Swift.String {
+  case poor
+  case good
+  case disConnected
+  public init?(rawValue: Swift.String)
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public enum NetworkBandwidthUnit : Swift.String {
+  case mbps
+  case kbps
+  case bps
+  public init?(rawValue: Swift.String)
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
 }
 @objc @_inheritsConvenienceInitializers @IBDesignable @_Concurrency.MainActor(unsafe) open class MarqueeLabel : UIKit.UILabel, QuartzCore.CAAnimationDelegate {
   public enum MarqueeType {
@@ -341,7 +362,11 @@ extension VLPlayerLib.VLPlayer {
   public func setClosedCaption(selectedKey: Swift.String, selectedIndex: Swift.Int)
   public func showOrHideAlwaysPlaybackControl(isShowing: Swift.Bool)
 }
+extension VLPlayerLib.VLPlayer {
+  @objc dynamic open func isPlaying() -> Swift.Bool
+}
 @objc @_inheritsConvenienceInitializers open class VLPlayer : ObjectiveC.NSObject {
+  weak open var videoPlayerDatasource: (any VLPlayerLib.VideoPlayerDataSource)?
   @objc weak open var videoPlayerDelegate: (any VLPlayerLib.videoPlaybackDelegate)?
   @objc weak open var castDelegate: (any VLPlayerLib.ChromeCastPlaybackDelegate)?
   weak open var clientSideAdTrackingDelegate: (any VLPlayerLib.ClientSideAdTrackingDelegate)? {
@@ -354,12 +379,12 @@ extension VLPlayerLib.VLPlayer {
   }
   open var enablePlayerBitrateLogs: Swift.Bool?
   @objc override dynamic public init()
-  open func setSource(vlToken: Swift.String, vlAPIEndPoint: Swift.String? = nil, vlBeaconEndPoint: Swift.String? = nil, videoID: Swift.String, vlPlayerTag: Swift.String, customControlsView: UIKit.UIView?, adUrl: Swift.String?, playerProgressInterval: Swift.Int? = nil, playerFeaturesSupported: VLPlayerLib.VLPlayer.VLPlayerFeatureSupported!, nextVideoList: [Swift.String] = [], isSuccess: @escaping ((_ isSuccess: Swift.Bool, _ playerView: UIKit.UIView?, _ contentResponse: Swift.Dictionary<Swift.String, Swift.AnyObject>?) -> Swift.Void))
+  open func setSource(vlToken: Swift.String, vlAPIEndPoint: Swift.String? = nil, videoID: Swift.String, vlPlayerTag: Swift.String, customControlsView: UIKit.UIView?, adUrl: Swift.String?, playerProgressInterval: Swift.Int? = nil, images: (leftImage: UIKit.UIImage, rightImage: UIKit.UIImage?)? = nil, playerFeaturesSupported: VLPlayerLib.VLPlayer.VLPlayerFeatureSupported!, nextVideoList: [Swift.String] = [], householdID: Swift.String? = nil, tveProvider: Swift.String?, location: (lat: Swift.String, long: Swift.String)?, isSuccess: @escaping ((_ isSuccess: Swift.Bool, _ playerView: UIKit.UIView?, _ contentResponse: Swift.Dictionary<Swift.String, Swift.AnyObject>?) -> Swift.Void))
   @objc deinit
 }
 extension VLPlayerLib.VLPlayer {
   public struct VLPlayerFeatureSupported {
-    public init(fullScreenOnly: Swift.Bool, isCustomLoaderAdded: Swift.Bool = false, shouldStartPictureInPictureInline: Swift.Bool = false, autoPlayEnabled: Swift.Bool = true, loopVideoPlayback: Swift.Bool = false, hideVideoControls: Swift.Bool = false, mutePlayback: Swift.Bool = false, customPlayerControlsColor: VLPlayerLib.PlayerControlsColor?, clientSideAdTrackingDetails: VLPlayerLib.VLPlayer.VLClientSideAdTrackingDetails? = nil, showPlayerControlAlways: Swift.Bool = false, supportsChromeCast: Swift.Bool = false, chromecastCustomReceiver: Swift.String?, playerResponseRequired: Swift.Bool = false, preGameStartTime: Swift.Double?)
+    public init(fullScreenOnly: Swift.Bool, isCustomLoaderAdded: Swift.Bool = false, shouldStartPictureInPictureInline: Swift.Bool = false, autoPlayEnabled: Swift.Bool = true, loopVideoPlayback: Swift.Bool = false, hideVideoControls: Swift.Bool = false, mutePlayback: Swift.Bool = false, customPlayerControlsColor: VLPlayerLib.PlayerControlsColor?, clientSideAdTrackingDetails: VLPlayerLib.VLPlayer.VLClientSideAdTrackingDetails? = nil, showPlayerControlAlways: Swift.Bool = false, supportsChromeCast: Swift.Bool = false, chromecastCustomReceiver: Swift.String?, playerResponseRequired: Swift.Bool = false, preGameStartTime: Swift.Double?, appMacrosList: [Swift.String : Swift.String]? = [:])
   }
   public struct VLClientSideAdTrackingDetails {
     public init(isClientSideAdTrackingEnabled: Swift.Bool, isWTAEnabled: Swift.Bool)
@@ -425,7 +450,12 @@ extension VLPlayerLib.VLPlayer {
 public struct PlayerControlsColor {
   public init(iconColor: Swift.String? = nil, textColor: Swift.String? = nil, progressBarBGColor: Swift.String? = nil, progressBarColor: Swift.String? = nil)
 }
+public protocol VideoPlayerDataSource : AnyObject {
+  func isUserLoggedIn() -> Swift.Bool
+}
 @objc public protocol videoPlaybackDelegate : ObjectiveC.NSObjectProtocol {
+  @objc optional func customPlayerState(isPlaying: Swift.Bool)
+  @objc optional func customPlayerControls(isHidden: Swift.Bool)
   @objc optional func videoStarted(timestamp: Swift.Double, playerTag: Swift.String)
   @objc optional func videoFinished(playerTag: Swift.String)
   @objc optional func videoPause(timestamp: Swift.Double, playerTag: Swift.String)
@@ -510,6 +540,12 @@ public protocol ClientSideAdTrackingDelegate : AnyObject {
 extension VLPlayerLib.NetworkReachabilityManager.NetworkReachabilityStatus : Swift.Equatable {
 }
 public func == (lhs: VLPlayerLib.NetworkReachabilityManager.NetworkReachabilityStatus, rhs: VLPlayerLib.NetworkReachabilityManager.NetworkReachabilityStatus) -> Swift.Bool
+extension VLPlayerLib.NetworkConnectionStatus : Swift.Equatable {}
+extension VLPlayerLib.NetworkConnectionStatus : Swift.Hashable {}
+extension VLPlayerLib.NetworkConnectionStatus : Swift.RawRepresentable {}
+extension VLPlayerLib.NetworkBandwidthUnit : Swift.Equatable {}
+extension VLPlayerLib.NetworkBandwidthUnit : Swift.Hashable {}
+extension VLPlayerLib.NetworkBandwidthUnit : Swift.RawRepresentable {}
 extension VLPlayerLib.MarqueeLabel.MarqueeType : Swift.Equatable {}
 extension VLPlayerLib.MarqueeLabel.MarqueeType : Swift.Hashable {}
 extension VLPlayerLib.VLPlayer.VideoPlayerGravity : Swift.Equatable {}
